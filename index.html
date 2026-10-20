@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VisionAssist: read printed text aloud</title>
+<meta name="description" content="VisionAssist turns a photo of printed text into speech for visually impaired users.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+
+<header class="top">
+  <h1>VisionAssist</h1>
+  <div class="tools" role="group" aria-label="Display settings">
+    <button id="smaller" type="button" aria-label="Decrease text size">A−</button>
+    <button id="bigger" type="button" aria-label="Increase text size">A+</button>
+    <button id="contrast" type="button" aria-pressed="false">Light mode</button>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <p class="lead">Point your camera at printed text, or choose a photo. VisionAssist reads it back to you.</p>
+  </section>
+
+  <section aria-labelledby="s1">
+    <h2 id="s1">1. Choose a photo of text</h2>
+    <label class="file" for="image">Take or choose a photo</label>
+    <input id="image" type="file" accept="image/*" capture="environment">
+    <img id="preview" alt="Preview of the photo you chose" hidden>
+    <button id="scan" type="button" class="primary" disabled>Read text from photo</button>
+    <p id="status" role="status" aria-live="polite">No photo chosen yet.</p>
+    <progress id="progress" max="100" value="0" hidden aria-label="Reading progress"></progress>
+  </section>
+
+  <section aria-labelledby="s2">
+    <h2 id="s2">2. Listen or edit the text</h2>
+    <label for="text">Recognised text (you can also type here)</label>
+    <textarea id="text" rows="8" placeholder="Text from your photo appears here."></textarea>
+    <div class="row">
+      <button id="speak" type="button" class="primary">Read aloud</button>
+      <button id="stop" type="button">Stop</button>
+      <button id="clear" type="button">Clear</button>
+    </div>
+    <label for="rate">Speech speed: <output id="rateOut">1.0</output>×</label>
+    <input id="rate" type="range" min="0.5" max="2" step="0.1" value="1">
+  </section>
+</main>
+
+<footer>
+  <p>Built for SDG 9 (Industry, Innovation and Infrastructure) and SDG 10 (Reduced Inequalities). Photos are processed in your browser and are never uploaded.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+<script src="utils.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
