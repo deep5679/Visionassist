@@ -1,0 +1,9 @@
+.git
+.gitignore
+.gitattributes
+README.md
+Jenkinsfile
+terraform/
+node_modules/
+*.pem
+.env
