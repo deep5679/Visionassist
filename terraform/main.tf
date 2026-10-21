@@ -35,11 +35,21 @@ resource "aws_security_group" "web" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # Outbound limited to HTTPS and HTTP (package, GitHub and image downloads only).
+  # Destination stays 0.0.0.0/0 because GitHub, Docker Hub and AWS mirrors use changing IP ranges.
   egress {
-    description = "Allow outbound traffic (package and image downloads)"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    description = "HTTPS outbound for package and image downloads"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    description = "HTTP outbound for OS package mirrors"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -50,6 +60,9 @@ resource "aws_instance" "web" {
   ami                    = nonsensitive(data.aws_ssm_parameter.al2023.value)
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.web.id]
+
+  # The web server is intentionally public so visitors can reach the website
+  associate_public_ip_address = true
 
   # Installs Docker, builds the image from GitHub and starts the container
   user_data = <<-EOT
