@@ -1,15 +1,16 @@
-# VisionAssist static site served by a non-root nginx image
-FROM nginxinc/nginx-unprivileged:1.27-alpine
+FROM jenkins/jenkins:lts-jdk17
 
-# Apply the latest OS security patches (fixes Trivy findings), then drop back to the non-root user
+# Runs as root so Jenkins can use the mounted Docker socket.
+# Accepted risk for a local lab only (SonarQube flags this as a Low security finding).
 USER root
-RUN apk update && apk upgrade --no-cache
-USER 101
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY index.html style.css app.js utils.js /usr/share/nginx/html/
-
-EXPOSE 8080
-
-HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
-  CMD wget -qO- http://localhost:8080/ >/dev/null || exit 1
+# Docker CLI (to build/run containers through the host's Docker) and Node.js (for unit tests)
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ca-certificates curl gnupg nodejs npm \
+ && install -m 0755 -d /etc/apt/keyrings \
+ && curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc \
+ && chmod a+r /etc/apt/keyrings/docker.asc \
+ && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo $VERSION_CODENAME) stable" > /etc/apt/sources.list.d/docker.list \
+ && apt-get update \
+ && apt-get install -y --no-install-recommends docker-ce-cli \
+ && rm -rf /var/lib/apt/lists/*
