@@ -61,12 +61,14 @@ resource "aws_instance" "web" {
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.web.id]
 
-  # The web server is intentionally public so visitors can reach the website
-  associate_public_ip_address = true
+  # No auto-assigned public IP: the public address is attached as an Elastic IP below
+  associate_public_ip_address = false
 
   # Installs Docker, builds the image from GitHub and starts the container
   user_data = <<-EOT
     #!/bin/bash
+    # Wait until the Elastic IP is attached and the internet is reachable
+    until curl -s -m 5 -o /dev/null https://github.com; do sleep 5; done
     dnf install -y docker git
     systemctl enable --now docker
     git clone ${var.repo_url} /opt/visionassist
@@ -87,6 +89,17 @@ resource "aws_instance" "web" {
 
   tags = {
     Name    = "visionassist-server"
+    Project = "VisionAssist"
+  }
+}
+
+# Stable public address for the website (the server is intentionally public)
+resource "aws_eip" "web" {
+  domain   = "vpc"
+  instance = aws_instance.web.id
+
+  tags = {
+    Name    = "visionassist-eip"
     Project = "VisionAssist"
   }
 }
